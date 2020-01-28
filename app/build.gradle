@@ -1,0 +1,87 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+
+
+// Cargar archivo local de propiedades
+Properties properties = new Properties()
+properties.load(project.rootProject.file("local.properties").newDataInputStream())
+
+
+android {
+    compileSdkVersion 28
+    buildToolsVersion "29.0.0"
+    defaultConfig {
+        applicationId "com.sergio.buildconfigexample"
+        minSdkVersion 16
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.debug
+    }
+    buildTypes {
+
+        // Cargar parametros de desarrollo
+        def PROTOCOL_DEV = properties.getProperty('PROTOCOL_DEV')
+        def IP_ADDRESS_DEV = properties.getProperty('IP_ADDRESS_DEV')
+        def PORT_DEV = properties.getProperty('PORT_DEV')
+
+        // Cargar parametros de test
+        def PROTOCOL_TEST = properties.getProperty('PROTOCOL_TEST')
+        def IP_ADDRESS_TEST = properties.getProperty('IP_ADDRESS_TEST')
+        def PORT_TEST = properties.getProperty('PORT_TEST')
+
+        // Cargar parametros de produccion
+        def PROTOCOL_PRO = properties.getProperty('PROTOCOL_PRO')
+        def IP_ADDRESS_PRO = properties.getProperty('IP_ADDRESS_PRO')
+        def PORT_PRO = properties.getProperty('PORT_PRO')
+
+        desarrollo {
+            applicationIdSuffix ".desarrollo"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "$VAR_NAME_BASE_URL", "\"$PROTOCOL_DEV://$IP_ADDRESS_DEV:$PORT_DEV/\""
+            buildConfigField "String", "$VAR_NAME_IP_ADDRESS", "\"$IP_ADDRESS_DEV\""
+            buildConfigField("String", "$VAR_NAME_BUILD_VARIAN", "\"DES \"")
+        }
+
+        pruebas{
+            applicationIdSuffix ".pruebas"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "$VAR_NAME_BASE_URL", "\"$PROTOCOL_TEST://$IP_ADDRESS_TEST:$PORT_TEST/\""
+            buildConfigField "String", "$VAR_NAME_IP_ADDRESS", "\"$IP_ADDRESS_TEST\""
+            buildConfigField("String", "$VAR_NAME_BUILD_VARIAN", "\"PRU \"")
+
+        }
+
+        produccion{
+            applicationIdSuffix ".release"
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "$VAR_NAME_BASE_URL", "\"$PROTOCOL_PRO://$IP_ADDRESS_PRO:$PORT_PRO/\""
+            buildConfigField "String", "$VAR_NAME_IP_ADDRESS", "\"$IP_ADDRESS_PRO\""
+            buildConfigField("String", "$VAR_NAME_BUILD_VARIAN", "\"\"")
+
+        }
+
+        release {
+            initWith produccion
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.core:core-ktx:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+}
